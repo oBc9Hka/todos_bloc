@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:todos/bloc/bloc.dart';
 import 'package:todos/data/repositories/dummy_repo.dart';
+import 'package:todos/data/repositories/todo_repo.dart';
 import 'package:todos/model/todo.dart';
 import 'package:todos/ui/widgets/app_bar.dart';
 import 'package:todos/ui/widgets/todo_tile.dart';
@@ -20,7 +21,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
-    bloc = Bloc(DummyRepository());
+    // bloc = Bloc(DummyRepository());
+    bloc = Bloc(TodoRepository());
     bloc.event.add(LoadTodo());
     super.initState();
   }
@@ -38,24 +40,38 @@ class _MyHomePageState extends State<MyHomePage> {
         bloc: bloc,
         createTodoTextController: _createTodoTextController,
       ),
-      body: StreamBuilder<List<Todo>>(
-        stream: bloc.state,
-        builder: (_, snapshot) {
-          if (snapshot.hasData) {
-            if (snapshot.data!.isEmpty) {
+      body: RefreshIndicator(
+        onRefresh: () async {
+          bloc.event.add(LoadTodo());
+        },
+        child: StreamBuilder<List<Todo>>(
+          stream: bloc.state,
+          builder: (_, snapshot) {
+            if (snapshot.hasData) {
+              if (snapshot.data!.isEmpty) {
+                bloc.event.add(LoadTodo());
+                return ListView(
+                  children: [
+                    Container(
+                      constraints: BoxConstraints(
+                          maxHeight: MediaQuery.of(context).size.height * 0.8),
+                      child: const Center(child: Text('Список пуст')),
+                    ),
+                  ],
+                );
+              }
+              return ListView(
+                children: [
+                  ...snapshot.data!.map(
+                    (todo) => TodoTile(todo: todo, bloc: bloc),
+                  ),
+                ],
+              );
+            } else {
               return const Center(child: Text('Список пуст'));
             }
-            return ListView(
-              children: [
-                ...snapshot.data!.map(
-                  (todo) => TodoTile(todo: todo, bloc: bloc),
-                ),
-              ],
-            );
-          } else {
-            return const Center(child: Text('Список пуст'));
-          }
-        },
+          },
+        ),
       ),
     );
   }

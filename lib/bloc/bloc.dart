@@ -45,16 +45,19 @@ class Bloc {
     _stateController.close();
     _eventsController.close();
   }
+  void _load() async{
+    todos = await _repository.load();
+  }
 
   void _handleEvent(Events event) async {
     if (event is LoadTodo) {
-      todos = await _repository.load();
+      _load();
     } else if (event is AddTodo) {
-      await _repository.add(event.title);
+      await _repository.add(event.title).whenComplete(() => _load());
     } else if (event is CheckTodo) {
-      await _repository.changeState(event.id);
+      await _repository.changeState(event.id).whenComplete(() => _load());
     } else if (event is RemoveTodo) {
-      await _repository.remove(event.id);
+      await _repository.remove(event.id).whenComplete(() => _load());
     }
     _stateController.add(todos);
   }

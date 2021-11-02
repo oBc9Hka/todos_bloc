@@ -11,7 +11,7 @@ class TodoTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dismissible(
-      key: ValueKey(todo.title),
+      key: UniqueKey(),
       direction: DismissDirection.startToEnd,
       background: Container(
         color: Colors.red,

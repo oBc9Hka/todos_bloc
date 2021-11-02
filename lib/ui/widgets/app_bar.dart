@@ -27,7 +27,7 @@ class CustomAppBar extends StatelessWidget with PreferredSizeWidget {
         ),
         ElevatedButton(
           onPressed: () {
-            if (createTodoTextController.text != '') {
+            if (createTodoTextController.text.trim() != '') {
               bloc.event.add(AddTodo(createTodoTextController.text));
             }
             createTodoTextController.clear();
